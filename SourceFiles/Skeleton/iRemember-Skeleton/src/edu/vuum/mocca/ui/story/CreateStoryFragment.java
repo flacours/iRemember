@@ -234,7 +234,7 @@ public class CreateStoryFragment extends Fragment {
 				try {
 					date = StoryData.FORMAT.parse(storyTimeCreateable.toString());
 				} catch (ParseException e1) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					Log.e("CreateStoryFragment", "Date was not parsable, reverting to current time");
 					date = new Date();
 				}
