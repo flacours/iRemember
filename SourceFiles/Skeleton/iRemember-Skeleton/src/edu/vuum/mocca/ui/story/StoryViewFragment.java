@@ -116,7 +116,7 @@ public class StoryViewFragment extends Fragment {
 		}
 	};
 
-	public static StoryViewFragment newInstance(long index) {
+    public static StoryViewFragment newInstance(long index) {
 		StoryViewFragment f = new StoryViewFragment();
 
 		// Supply index input as an argument.
@@ -235,7 +235,7 @@ public class StoryViewFragment extends Fragment {
                 public void onClick(View v) {
 
                     // - Play the ringtone
-                    if(ringtone.isPlaying() == false)
+                    if (ringtone.isPlaying() == false)
                         ringtone.play();
                 }
             });

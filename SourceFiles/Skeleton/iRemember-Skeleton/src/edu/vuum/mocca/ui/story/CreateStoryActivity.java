@@ -238,10 +238,11 @@ public class CreateStoryActivity extends StoryActivityBase {
 		// - Use getOutputMediaFile() to create a new
 		// filename for this specific sound file
 		File fileName = getOutputMediaFile(MEDIA_TYPE_AUDIO);
+        String path = fileName.getPath();
 		
 		// - Add the filename to the Intent as an extra. Use the Intent-extra name
 		// from the SoundRecordActivity class, EXTRA_OUTPUT
-        intent.putExtra(SoundRecordActivity.EXTRA_OUTPUT, fileName);
+        intent.putExtra(SoundRecordActivity.EXTRA_OUTPUT, path);
 		
 		// - Start a new activity for result, using the new intent and the request
 		// code MIC_SOUND_REQUEST
@@ -260,11 +261,13 @@ public class CreateStoryActivity extends StoryActivityBase {
 		
 		// - Set the imagePath for this image file using the pre-made function
 		// getOutputMediaFile to create a new filename for this specific image;
-        Uri uri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+        File file = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+
+        fragment.imagePath = Uri.parse(file.getAbsolutePath());
 		
 		// - Add the filename to the Intent as an extra. Use the Intent-extra name
 		// from the MediaStore class, EXTRA_OUTPUT
-		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
 		
 		// - Start a new activity for result, using the new intent and the request
 		// code CAMERA_PIC_REQUEST
