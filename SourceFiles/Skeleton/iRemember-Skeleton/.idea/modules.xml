@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/iRemember-Skeleton.iml" filepath="$PROJECT_DIR$/iRemember-Skeleton.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../iRememberContentProvider/iRememberContentProvider/iRememberContentProvider.iml" filepath="$PROJECT_DIR$/../iRememberContentProvider/iRememberContentProvider/iRememberContentProvider.iml" />
     </modules>
   </component>
 </project>
