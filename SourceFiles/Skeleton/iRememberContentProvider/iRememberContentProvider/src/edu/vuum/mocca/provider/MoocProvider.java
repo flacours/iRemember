@@ -12,6 +12,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -144,9 +145,10 @@ public class MoocProvider extends ContentProvider {
             final String[] projection, final String selection,
             final String[] selectionArgs, final String sortOrder) {
 
-        // TODO: Perform a query on the database with the given parameters
-    	
-    	return null;
+        // : Perform a query on the database with the given parameters
+
+        Cursor cursor = mDB.query(tableName, projection, selection, selectionArgs, sortOrder);
+    	return cursor;
     }
 
     @Override
