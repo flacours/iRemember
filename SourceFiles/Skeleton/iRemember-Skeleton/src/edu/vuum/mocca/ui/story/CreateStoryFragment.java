@@ -52,9 +52,14 @@ import java.text.ParseException;
 import java.util.Date;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -69,6 +74,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import edu.vanderbilt.mooc.R;
 import edu.vuum.mocca.orm.MoocResolver;
 import edu.vuum.mocca.orm.StoryData;
@@ -140,7 +146,9 @@ public class CreateStoryFragment extends Fragment {
 		try {
 			mOpener = (OnOpenWindowInterface) activity;
 			resolver = new MoocResolver(activity);
-		} catch (ClassCastException e) {
+
+
+        } catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString()
 					+ " must implement OnOpenWindowListener");
 		}
@@ -303,6 +311,7 @@ public class CreateStoryFragment extends Fragment {
 		});
 
 	}
+
 
 	Uri imagePathFinal = null;
 

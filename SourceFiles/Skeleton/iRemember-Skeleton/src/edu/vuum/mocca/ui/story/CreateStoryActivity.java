@@ -53,11 +53,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -98,21 +105,83 @@ public class CreateStoryActivity extends StoryActivityBase {
 			getSupportFragmentManager().beginTransaction()
 					.add(android.R.id.content, fragment).commit();
 		}
-	}
+		
+    }
 
-	/**
+    /**
 	 * Method to be called when Audio Clicked button is pressed.
 	 */
 	public void addAudioClicked(View aView) {
-		launchSoundIntent();
+
+        if(hasAudioInput() == true) {
+
+            launchSoundIntent();
+        } else {
+            AlertNoAudioInput();
+        }
 	}
 
 	/**
 	 * Method to be called when Video Clicked button is pressed.
 	 */
 	public void addVideoClicked(View aView) {
-		launchVideoCameraIntent();
+        if(hasAudioInput() == true) {
+            launchVideoCameraIntent();
+        } else {
+            AlertNoAudioInput();
+        }
+
 	}
+
+    private void AlertNoAudioInput() {
+        // 1. Instantiate an AlertDialog.Builder with its constructor
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+// 2. Chain together various setter methods to set the dialog characteristics
+        builder.setMessage("Audio input not available.\nConnect a microphone if you are using an AVD emulator.")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setTitle("Alert");
+// 3. Get the AlertDialog from create()
+        AlertDialog dialog = builder.create();
+
+        dialog.show();
+
+
+        fragment.videoCaptureButton.setEnabled(false);
+        fragment.audioCaptureButton.setEnabled(false);
+    }
+
+
+    private boolean hasAudioInput() {
+        boolean retVal = false;
+        try {
+
+            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            int bufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_STEREO,
+                    AudioFormat.ENCODING_DEFAULT);
+            if(bufferSize < 0) bufferSize = 10000;
+            AudioRecord recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                    44100, AudioFormat.CHANNEL_IN_STEREO,
+                    AudioFormat.ENCODING_DEFAULT, bufferSize);
+            int state = recorder.getState();
+            retVal = (state == AudioRecord.STATE_INITIALIZED);
+        }
+        catch (Exception ex)
+        {
+            Log.e(LOG_TAG, "Failed to initialized audio input", ex);
+        }
+        return retVal;
+    }
+
 
 	/**
 	 * Method to be called when Photo Clicked button is pressed.
@@ -121,11 +190,11 @@ public class CreateStoryActivity extends StoryActivityBase {
 		launchCameraIntent();
 	}
 
-	public void getDateClicked(View aView){
-	    DialogFragment newFragment = new DatePickerFragment();
-	    newFragment.show(getFragmentManager(), "datePicker");
+	public void getDateClicked(View aView) {
+		DialogFragment newFragment = new DatePickerFragment();
+		newFragment.show(getFragmentManager(), "datePicker");
 	}
-	
+
 	public void getLocationClicked(View aView) {
 		// Acquire a reference to the system Location Manager
 		final LocationManager locationManager = (LocationManager) this
@@ -167,7 +236,7 @@ public class CreateStoryActivity extends StoryActivityBase {
 				makeUseOfNewLocation(location);
 			} else {
 				Toast.makeText(getApplicationContext(),
-						"GPS has yet to calculate location.", Toast.LENGTH_LONG)
+						"GPS has yet to calculate location. If you are using an AVD do telnet localhost 5554. Then enter geo fix -73 45", Toast.LENGTH_LONG)
 						.show();
 			}
 
@@ -192,9 +261,7 @@ public class CreateStoryActivity extends StoryActivityBase {
 
 		// For future implementation: store videos in a separate directory
 		File mediaStorageDir = new File(
-				Environment
-						.getExternalStorageDirectory(),
-				"iRemember");
+				Environment.getExternalStorageDirectory(), "iRemember");
 		// This location works best if you want the created images to be shared
 		// between applications and persist after your app has been uninstalled.
 
@@ -226,83 +293,88 @@ public class CreateStoryActivity extends StoryActivityBase {
 
 		return mediaFile;
 	}
-	
-	// This function creates a new Intent to launch the Audio Recording Activity
-	
-	private void launchSoundIntent() {
-		
-		// - Create a new intent to launch the SoundRecordActivity activity
-        Intent intent = new Intent(this, SoundRecordActivity.class);
 
-		
+	// This function creates a new Intent to launch the Audio Recording Activity
+
+	private void launchSoundIntent() {
+
+		// - Create a new intent to launch the SoundRecordActivity activity
+		Intent intent = new Intent(this, SoundRecordActivity.class);
+
 		// - Use getOutputMediaFile() to create a new
 		// filename for this specific sound file
 		File fileName = getOutputMediaFile(MEDIA_TYPE_AUDIO);
-        String path = fileName.getPath();
-		
-		// - Add the filename to the Intent as an extra. Use the Intent-extra name
+		String path = fileName.getPath();
+
+		// - Add the filename to the Intent as an extra. Use the Intent-extra
+		// name
 		// from the SoundRecordActivity class, EXTRA_OUTPUT
-        intent.putExtra(SoundRecordActivity.EXTRA_OUTPUT, path);
-		
-		// - Start a new activity for result, using the new intent and the request
+		intent.putExtra(SoundRecordActivity.EXTRA_OUTPUT, path);
+
+		// - Start a new activity for result, using the new intent and the
+		// request
 		// code MIC_SOUND_REQUEST
 		startActivityForResult(intent, MIC_SOUND_REQUEST);
 	}
-	
+
 	// This function creates a new Intent to launch the built-in Camera activity
 
 	private void launchCameraIntent() {
-		
-		// - Create a new intent to launch the MediaStore, Image capture function
-		// Hint: use standard Intent from MediaStore class
-		// See: http://developer.android.com/reference/android/provider/MediaStore.html
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-		
+		// - Create a new intent to launch the MediaStore, Image capture
+		// function
+		// Hint: use standard Intent from MediaStore class
+		// See:
+		// http://developer.android.com/reference/android/provider/MediaStore.html
+		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
 		// - Set the imagePath for this image file using the pre-made function
 		// getOutputMediaFile to create a new filename for this specific image;
-        File file = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+		File file = getOutputMediaFile(MEDIA_TYPE_IMAGE);
 
-        fragment.imagePath = Uri.parse(file.getAbsolutePath());
-		
-		// - Add the filename to the Intent as an extra. Use the Intent-extra name
+		fragment.imagePath = Uri.parse(file.getAbsolutePath());
+
+		// - Add the filename to the Intent as an extra. Use the Intent-extra
+		// name
 		// from the MediaStore class, EXTRA_OUTPUT
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-		
-		// - Start a new activity for result, using the new intent and the request
+
+		// - Start a new activity for result, using the new intent and the
+		// request
 		// code CAMERA_PIC_REQUEST
 		startActivityForResult(intent, CAMERA_PIC_REQUEST);
 	}
 
-	// This function creates a new Intent to launch the built-in Video Camera activity
-	
+	// This function creates a new Intent to launch the built-in Video Camera
+	// activity
+
 	private void launchVideoCameraIntent() {
-		// - Create a new intent to launch the MediaStore, Image capture function
+		// - Create a new intent to launch the MediaStore, Image capture
+		// function
 		// Hint: use standard Intent from MediaStore class
-		// See: http://developer.android.com/reference/android/provider/MediaStore.html
-        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-		
+		// See:
+		// http://developer.android.com/reference/android/provider/MediaStore.html
+		Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+
 		// - Set the fileUri for this video file using the pre-made function
 		// getOutputMediaFile to create a new filename for this specific video;
-        Uri uri = getOutputMediaFileUri(MEDIA_TYPE_VIDEO);
+		Uri uri = getOutputMediaFileUri(MEDIA_TYPE_VIDEO);
 
-		
-		// - Add the filename to the Intent as an extra. Use the Intent-extra name
+		// - Add the filename to the Intent as an extra. Use the Intent-extra
+		// name
 		// from the MediaStore class, EXTRA_OUTPUT
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 
-		
 		// - Specify as an extra that the video quality should be HIGH. Use the
 		// Intent-extra name, EXTRA_VIDEO_QUALITY, from the MediaStore class
-		// set the video image quality to high 
+		// set the video image quality to high
 		intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
 
-		
-		// - Start a new activity for result, using the new intent and the request
+		// - Start a new activity for result, using the new intent and the
+		// request
 		// code CAMERA_VIDEO_REQUEST
-        startActivityForResult(intent, CAMERA_VIDEO_REQUEST);
+		startActivityForResult(intent, CAMERA_VIDEO_REQUEST);
 
-	
 	}
 
 }
