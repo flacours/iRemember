@@ -198,15 +198,15 @@ public class StoryViewFragment extends Fragment {
 		editButton.setOnClickListener(myOnClickListener);
 		deleteButton.setOnClickListener(myOnClickListener);
 
-		try {
-			setUiToStoryData(getUniqueKey());
-		} catch (RemoteException e) {
-			Toast.makeText(getActivity(),
-					"Error retrieving information from local data store.",
-					Toast.LENGTH_LONG).show();
-			Log.e(LOG_TAG, "Error getting Story data from C.P.");
-			// e.printStackTrace();
-		}
+//		try {
+//			//setUiToStoryData(getUniqueKey());
+//		} catch (RemoteException e) {
+//			Toast.makeText(getActivity(),
+//					"Error retrieving information from local data store.",
+//					Toast.LENGTH_LONG).show();
+//			Log.e(LOG_TAG, "Error getting Story data from C.P.");
+//			// e.printStackTrace();
+//		}
 	}
 
 	public void setUiToStoryData(long getUniqueKey) throws RemoteException {
@@ -241,7 +241,8 @@ public class StoryViewFragment extends Fragment {
             });
 
             // Display the video
-			
+
+
 			String videoLinkPath = String.valueOf(storyData.videoLink).toString();
 
 			// Set up video playback using the MediaController android widget
@@ -256,18 +257,19 @@ public class StoryViewFragment extends Fragment {
             mediaController.setAnchorView(videoLinkView);
 			
 			
-			
 			// - Now the VideoView, videoLinkView, needs to have a Media Controller set to it
 			// use the setMediaController function from the VideoView to set it to the new Media Controller
             videoLinkView.setMediaController(mediaController);
-			
-			// - Now we need to set the URI for the VideoView, use the setVideoURI function on the
-			//  videoLinkPath string from before.
-            videoLinkView.setVideoURI(Uri.parse(videoLinkPath));
-			
-			
-			// - Start the video, using the start function on the VideoView
-			videoLinkView.start();
+
+            if(videoLinkPath.isEmpty() == false) {
+                // - Now we need to set the URI for the VideoView, use the setVideoURI function on the
+                //  videoLinkPath string from before.
+                videoLinkView.setVideoURI(Uri.parse(videoLinkPath));
+
+
+                // - Start the video, using the start function on the VideoView
+                videoLinkView.start();
+            }
 			
 			// Display the image data
 			
